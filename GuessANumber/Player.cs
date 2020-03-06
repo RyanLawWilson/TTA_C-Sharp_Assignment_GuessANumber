@@ -6,17 +6,20 @@ namespace GuessANumber
 {
     public class Player
     {
-        // New player
-        public Player(string name)
+        // For new players
+        public Player (string name)
         {
             Name = name;
-            Score = 0;
-            IsPlaying = true;
-            Guesses = 7;        // later, make this based on difficulty
+            time = DateTime.Now;
             ID = string.Format("{0}{1}{2}-{3}{4}{5}", time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second);
+            Score = 0;
+            Win = 0;
+            Loss = 0;
+            Plays = 0;
+            IsPlaying = true;
         }
 
-        // Keep the player's information from previous games
+        // For returning players
         public Player (string name, string id, long totalScore, int win, int loss, int plays)
         {
             Name = name;
@@ -26,15 +29,14 @@ namespace GuessANumber
             Loss = loss;
             Plays = plays;
             IsPlaying = true;
-            Guesses = 7;        // later, make this based on difficulty
         }
 
-        private DateTime time = new DateTime();     // Used to create a unique ID based on the time.
-        public string ID { get; set; }             // The ID is the time that the player was created.
+        private DateTime time;   // Used to create a unique ID based on the time.
+        public string ID { get; set; }              // The ID is the time that the player was created.
 
         public string Name { get; set; }
         public long Score { get; set; }
-        public int Guesses { get; set; }
+        public int Guesses = 7;                     // later, make this based on difficulty
         public int Win { get; set; }
         public int Loss { get; set; }
         public int Plays { get; set; }
@@ -44,16 +46,19 @@ namespace GuessANumber
         public bool IsPlaying { get; set; }
         public bool Won = false;
 
-        // Show the player's win/loss rate
-        public void ShowWLR()
-        {
-            Fancy.Write("");
-        }
-
         // Show all of the information associated with the player.
         public void ShowAll()
         {
-
+            Fancy.Write(String.Format("\n" +
+                 "==================================\n" +
+                $"\tName:         {Name}\n" +
+                $"\tScore:        {Score}\n" +
+                $"\tWins:         {Win}\n" +
+                $"\tLosses:       {Loss}\n" +
+                $"\tGames Played: {Plays}\n" +
+                $"\tWin Rate:     {((double) Win / Plays) * 100:F2}%\n" +
+                $"\tLoss Rate:    {((double) Loss / Plays) * 100:F2}%\n" +
+                 "==================================\n", 5));
         }
     }
 }

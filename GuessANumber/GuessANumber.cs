@@ -25,15 +25,16 @@ namespace GuessANumber
 
         public void Play()
         {
-            // Reset variables
-            Player.Guesses = 7;         // Change later
+            // Reset Variables
+            Player.Guesses = 7;
+            Player.Won = false;
 
             // Add difficulty multiplier later
             CorrectNumber = rand.Next(MinGuess, MaxGuess);
             Console.WriteLine(CorrectNumber);
 
             // As long as the player has guesses, guess.
-            while (Player.Guesses > 0 || Player.Won)
+            while (Player.Guesses > 0 && !Player.Won)
             {
                 // Determine if the guess is actually valid.
                 bool invalidGuess = true;
@@ -45,15 +46,33 @@ namespace GuessANumber
                 }
             }
 
-            if (Player.Won) Fancy.Write("\nWell done! Here are your stats: \nNOT YET IMPLEMENTED\n\n", afterPause: 500);
-            else Fancy.Write("\nYou lost.  It happens to the best of us....\n\n", afterPause: 1000);
+            if (Player.Won)
+            {
+                Fancy.Write("\nWell done!  ", afterPause: 500);
 
+                Player.Won = true;
+                Player.Win++;
+                Player.Plays++;
+
+                int scoreGained = (Player.Guesses + 1) * (int)Diff;
+                Fancy.Write("You got " + scoreGained + " points!  Here are your stats:\n", color: ConsoleColor.Green);
+                Player.Score += scoreGained;
+            }
+            else
+            {
+                Fancy.Write("\nYou lost.  It happens to the best of us....\n", afterPause: 1000);
+
+                Player.Won = false;
+                Player.Loss++;
+                Player.Plays++;
+            }
+
+            Player.ShowAll();
 
             GameIO.SaveGame(Player, Diff);            // Save the game.
 
-
-            Fancy.Write("Do you want to play again? (y or n) ");
-            string answer = Fancy.ReadLine(ConsoleColor.DarkYellow);
+            Fancy.Write("\nDo you want to play again? (y or n) ");
+            string answer = Fancy.ReadLine(ConsoleColor.Cyan);
             if (answer != "y")
             {
                 Player.IsPlaying = false;
@@ -99,14 +118,10 @@ namespace GuessANumber
                 if (guess == CorrectNumber)
                 {
                     Fancy.Write(
-                        "  **********\n" +
-                        "   You Win!\n" +
-                        "  **********\n");
-
+                      "\n  *******************\n" +
+                        "        You Win!\n" +
+                        "  *******************\n", 5, color: ConsoleColor.Magenta);
                     Player.Won = true;
-                    Player.Win++;
-                    Player.Plays++;
-                    Player.Score += Player.Guesses * 100;   // Later, increase player score according to difficulty. 
                 }
                 else if (guess > CorrectNumber) Fancy.Write("\tToo High\n", 80);
                 else if (guess < CorrectNumber) Fancy.Write("\tToo Low\n", 80);

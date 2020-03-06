@@ -17,25 +17,34 @@ namespace GuessANumber
             Player player;
 
             // If there is already a text file, find the player's information 
-            int difficulty;     // Initialization
-            if (File.Exists(GameIO.GameFile))
-            {
-                // Format of each player entry: NAME|ID|SCORE|WIN|LOSS|PLAYS|DIFF
-                playerDataArray = GameIO.GetPlayerData(playerName);         // Get the data relating to that player from the game file.
+            int difficulty;                 // The number representation of the difficulty
+            Difficulty difficultyName;      // The actual difficulty
 
+            // Determine if this player is new or has played before.
+            bool newPlayer;
+            if (File.Exists(GameIO.GameFile)) playerDataArray = GameIO.GetPlayerData(playerName, out newPlayer);  // Get the data relating to that player from the game file.
+            else
+            {
+                playerDataArray = null;
+                newPlayer = true;
+            }
+
+            // If the player is not new
+            if (!newPlayer)
+            {                
                 Fancy.Write("Welcome back, " + playerDataArray[0], 50, afterPause: 500, color: ConsoleColor.Magenta);
                 try
                 {
-                    Fancy.Write($"Your previous Difficulty: {playerDataArray[6]} | Choose Game Difficulty: ", 20);
+                    Fancy.Write($"\nYour previous Difficulty: {playerDataArray[6]} | Choose Game Difficulty (1-4): ", 20);
 
                     // If the player has a save game, instantiate the information.
                     player = new Player(
-                        playerDataArray[0],                         // Name
-                        playerDataArray[1],                         // ID
-                        Convert.ToInt64(playerDataArray[2]),        // Score
-                        Convert.ToInt32(playerDataArray[3]),        // Win
-                        Convert.ToInt32(playerDataArray[4]),        // Loss
-                        Convert.ToInt32(playerDataArray[5]));       // Plays
+                        name:       playerDataArray[0],                         
+                        id:         playerDataArray[1],                         
+                        totalScore: Convert.ToInt64(playerDataArray[2]),        
+                        win:        Convert.ToInt32(playerDataArray[3]),        
+                        loss:       Convert.ToInt32(playerDataArray[4]),        
+                        plays:      Convert.ToInt32(playerDataArray[5]));       
                 }
                 catch (IndexOutOfRangeException)
                 {
@@ -52,28 +61,29 @@ namespace GuessANumber
                 }
 
                 difficulty = AskForDifficulty();
+                difficultyName = SetDifficulty(difficulty);
             }
             else                // No text file? make one with the player's information.
             {
                 player = new Player(playerName);
-                File.WriteAllText(GameIO.GameFile, playerName + "|");
 
                 Fancy.Write("What difficulty do you want to play? (1, 2, 3, 4): ", 20);
                 difficulty = AskForDifficulty();
+                difficultyName = SetDifficulty(difficulty);
+
+                GameIO.AddPlayerToFile(player, difficultyName);
+
                 Tutorial();
             }
 
             BackUpAssignment(difficulty);
 
-            GuessANumber game = new GuessANumber(player, SetDifficulty(difficulty));
+            GuessANumber game = new GuessANumber(player, difficultyName);
 
             // Game Loop, stops when the player doesn't want to play anymore.
-            if (player.IsPlaying)
-            {
-                game.Play();
-            }
+            while (player.IsPlaying) game.Play();
 
-            Fancy.Write("Thanks for playing!", 75, color: ConsoleColor.Green);
+            Fancy.Write("\n\nThanks for playing!", 75, color: ConsoleColor.Green);
             Console.Read();
         }
 
@@ -82,7 +92,7 @@ namespace GuessANumber
         public static void BackUpAssignment(int difficulty)
         {
             // This little bit satifies the assignment (I think)
-            Fancy.Write("\n\nFor the sake of the assignment, Writing your number to a file...  ", 50, afterPause: 750);
+            Fancy.Write("\n\nFor the sake of the assignment, Writing your number to a file...  ", 40, afterPause: 750);
             File.WriteAllText(GameIO.AssignmentFile, difficulty.ToString());
             Fancy.Write("Done\n", $"Printing the contents of the file below:\n{File.ReadAllText(GameIO.AssignmentFile)}", 20, 25, pause: 250, afterPause: 250);
 
@@ -129,9 +139,9 @@ namespace GuessANumber
         // Just some text that shows the tutorial.
         public static void Tutorial()
         {
-            Fancy.Write("\n\tThe objective of this game is to guess the number I am thinking of.\n\t", 35, afterPause: 750);
-            Fancy.Write("You can change the difficulty to increase your score for winning.\n\t", 35, afterPause: 750);
-            Fancy.Write("To do so, type 'settings' whenever you are prompted to type a number.\n\n", 35, afterPause: 750);
+            Fancy.Write("\n\n\tThe objective of this game is to guess the number I am thinking of.\n\t", 35, afterPause: 1000);
+            // Fancy.Write("You can change the difficulty to increase your score for winning.\n\t", 35, afterPause: 750);
+            // Fancy.Write("To do so, type 'settings' whenever you are prompted to type a number.\n", 35, afterPause: 750);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace GuessANumber
             int difficulty;                 // The number representation of the difficulty
             Difficulty difficultyName;      // The actual difficulty
 
-            // Determine if this player is new or has played before.
+            // Determine if this player is new or has played before.  If the player is a returning player, get the player's data from the game file.
             bool newPlayer;
             if (File.Exists(GameIO.GameFile)) playerDataArray = GameIO.GetPlayerData(playerName, out newPlayer);  // Get the data relating to that player from the game file.
             else
@@ -29,7 +29,7 @@ namespace GuessANumber
                 newPlayer = true;
             }
 
-            // If the player is not new
+            // If the player is not new load their information from the game file.
             if (!newPlayer)
             {                
                 Fancy.Write("Welcome back, " + playerDataArray[0], 50, afterPause: 500, color: ConsoleColor.Magenta);

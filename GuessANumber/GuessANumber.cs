@@ -12,7 +12,7 @@ namespace GuessANumber
         {
             Player = player;
             Diff = diff;
-            MaxGuess = (int)Diff;       // Maximum guess based on the Difficulty enum's underlying value
+            MaxGuess = (int)Diff;       // Maximum guess based on the Difficulty enum's underlying value.  Maybe will change later
         }
 
         private Random rand = new Random();
@@ -60,7 +60,7 @@ namespace GuessANumber
             }
             else
             {
-                Fancy.Write("\nYou lost.  It happens to the best of us....\n", afterPause: 1000);
+                Fancy.Write("\nYou lost.  It happens to the best of us....\n", afterPause: 750);
 
                 Player.Won = false;
                 Player.Loss++;
@@ -123,8 +123,8 @@ namespace GuessANumber
                         "  *******************\n", 5, color: ConsoleColor.Magenta);
                     Player.Won = true;
                 }
-                else if (guess > CorrectNumber) Fancy.Write("\tToo High\n", 80);
-                else if (guess < CorrectNumber) Fancy.Write("\tToo Low\n", 80);
+                else if (guess > CorrectNumber) Fancy.Write("\tToo High","\n", 60, pause: 250, afterPause: 0);
+                else if (guess < CorrectNumber) Fancy.Write("\tToo Low","\n", 60, pause: 250, afterPause: 0);
             }
             else Fancy.Write($"\tOut of bounds!  Your guess should be between {MinGuess} and {MaxGuess}\n");
         }

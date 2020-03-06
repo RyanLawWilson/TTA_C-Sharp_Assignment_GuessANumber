@@ -6,7 +6,7 @@ using System.Text;
 
 namespace GuessANumber
 {
-    // This class is used to 
+    // This class is used to interact with files.
     public static class GameIO
     {
         public static string GameFile = @"C:\Users\Ryan Wilson\guess_a_game.txt";           // The file path that the user information will be on.

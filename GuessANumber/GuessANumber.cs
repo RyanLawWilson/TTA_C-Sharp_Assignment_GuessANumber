@@ -5,10 +5,10 @@ using System.IO;
 
 namespace GuessANumber
 {
-    public class GuessANumberGame
+    public class GuessANumber
     {
         // You need 1 player to play this game
-        public GuessANumberGame(GuessANumberPlayer player, Difficulty diff)
+        public GuessANumber(Player player, Difficulty diff)
         {
             Player = player;
             Diff = diff;
@@ -20,7 +20,7 @@ namespace GuessANumber
         public int MinGuess = 1;        // The smallest number to guess will never be smaller than 1
         public int MaxGuess { get; set; }
 
-        public GuessANumberPlayer Player { get; set; }
+        public Player Player { get; set; }
         public Difficulty Diff { get; set; }
 
         public void Play()
@@ -33,7 +33,7 @@ namespace GuessANumber
             Console.WriteLine(CorrectNumber);
 
             // As long as the player has guesses, guess.
-            while (Player.Guesses >= 0 || Player.Won)
+            while (Player.Guesses > 0 || Player.Won)
             {
                 // Determine if the guess is actually valid.
                 bool invalidGuess = true;
@@ -45,17 +45,11 @@ namespace GuessANumber
                 }
             }
 
-            if (Player.Won)
-            {
-                Fancy.Write("\nWell done! Here are your stats: \nNOT YET IMPLEMENTED\n\n", afterPause: 500);
-            }
-            else
-            {
-                Fancy.Write("\nIt happens to the best of us....\n\n", afterPause: 1000);
-            }
+            if (Player.Won) Fancy.Write("\nWell done! Here are your stats: \nNOT YET IMPLEMENTED\n\n", afterPause: 500);
+            else Fancy.Write("\nYou lost.  It happens to the best of us....\n\n", afterPause: 1000);
 
-            // Update the player record
-            string oldGameFile = File.ReadAllText(GameIO.GameFile);
+
+            GameIO.SaveGame(Player, Diff);            // Save the game.
 
 
             Fancy.Write("Do you want to play again? (y or n) ");
@@ -69,8 +63,6 @@ namespace GuessANumber
         // Checks the user input against a bunch of if statements and redirects to the method that is needed
         public void EvaluateGuess(string guess, out bool invalidGuess)
         {
-            invalidGuess = true;
-
             if (guess == "rules")
             {
                 invalidGuess = false;
@@ -81,7 +73,7 @@ namespace GuessANumber
                 invalidGuess = false;
                 throw new NotImplementedException();
             }
-            else
+            else                // The guess is a number
             {
                 try
                 {
@@ -107,9 +99,9 @@ namespace GuessANumber
                 if (guess == CorrectNumber)
                 {
                     Fancy.Write(
-                        "\t**********\n" +
-                        "\t You Win!\n" +
-                        "\t**********\n");
+                        "  **********\n" +
+                        "   You Win!\n" +
+                        "  **********\n");
 
                     Player.Won = true;
                     Player.Win++;
@@ -119,7 +111,7 @@ namespace GuessANumber
                 else if (guess > CorrectNumber) Fancy.Write("\tToo High\n", 80);
                 else if (guess < CorrectNumber) Fancy.Write("\tToo Low\n", 80);
             }
-            else Fancy.Write($"Out of bounds!  Your guess should be between {MinGuess} and {MaxGuess}\n");
+            else Fancy.Write($"\tOut of bounds!  Your guess should be between {MinGuess} and {MaxGuess}\n");
         }
     }
 }

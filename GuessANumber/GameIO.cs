@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace GuessANumber
 {
@@ -15,6 +16,9 @@ namespace GuessANumber
         // Seperates the file base on , to isolate each player.  Look through all players and find the one with the player's name.
         public static string[] GetPlayerData(string playerName)
         {
+            // Format of each player entry: NAME|ID|SCORE|WIN|LOSS|PLAYS|DIFF
+            // Each player is seperated by comma: NAME|ID|SCORE|WIN|LOSS|PLAYS|DIFF,NAME|ID|SCORE|WIN|LOSS|PLAYS|DIFF,NAME|ID|SCORE|WIN|LOSS|PLAYS|DIFF
+
             string file = File.ReadAllText(GameIO.GameFile);            // Read the file
             string[] allPlayers = file.Split(",");                      // Get all of the players that have played the game.
 
@@ -24,8 +28,19 @@ namespace GuessANumber
             return playerDataString.Split("|");
         }
 
+        // Saves the game and player information to the game file.
+        public static void SaveGame(Player player, Difficulty diff)
+        {
+            StringBuilder playerRecord = new StringBuilder();
+            playerRecord.Append($"{player.Name}|{player.ID}|{player.Score}|{player.Win}|{player.Loss}|{player.Plays}|{diff},");
+
+            string oldGameFile = File.ReadAllText(GameIO.GameFile);
+
+            Fancy.Write("\n=== Data saved ===\n", 100, color: ConsoleColor.Green);
+        }
+
         // Removes the player record from the file then adds the updated record.
-        public static void UpdateGameFile(GuessANumberPlayer player)
+        public static void UpdateGameFile(Player player)
         {
             // Format of each playerDataString: NAME|ID|SCORE|WIN|LOSS|PLAYS|DIFF
 

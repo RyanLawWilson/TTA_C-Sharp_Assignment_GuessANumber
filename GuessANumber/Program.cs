@@ -12,50 +12,62 @@ namespace GuessANumber
             Fancy.Write("Welcome to Guess a Game.","  What is your name: ", 15, 30, pause: 500);
             string playerName = Console.ReadLine();
 
-            string[] playerDataArray;
+            string[] playerDataArray;       // Will store the information from saved game file.
+
+            Player player;
+
             // If there is already a text file, find the player's information 
+            int difficulty;     // Initialization
             if (File.Exists(GameIO.GameFile))
             {
                 // Format of each player entry: NAME|ID|SCORE|WIN|LOSS|PLAYS|DIFF
-                playerDataArray = GameIO.GetPlayerData(playerName);         // Get the data relating to that player.
+                playerDataArray = GameIO.GetPlayerData(playerName);         // Get the data relating to that player from the game file.
 
-                Fancy.Write("Welcome back, " + playerDataArray[0] + "\n", 50, afterPause: 500, color: ConsoleColor.Magenta);
+                Fancy.Write("Welcome back, " + playerDataArray[0], 50, afterPause: 500, color: ConsoleColor.Magenta);
+                try
+                {
+                    Fancy.Write($"Your previous Difficulty: {playerDataArray[6]} | Choose Game Difficulty: ", 20);
 
-                Fancy.Write($"Your previous Difficulty: {playerDataArray[6]} | Difficulty: ", 20);
+                    // If the player has a save game, instantiate the information.
+                    player = new Player(
+                        playerDataArray[0],                         // Name
+                        playerDataArray[1],                         // ID
+                        Convert.ToInt64(playerDataArray[2]),        // Score
+                        Convert.ToInt32(playerDataArray[3]),        // Win
+                        Convert.ToInt32(playerDataArray[4]),        // Loss
+                        Convert.ToInt32(playerDataArray[5]));       // Plays
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    Fancy.Write(
+                        ".  You closed the program prematurely: no saved data.\n" +
+                        "To save your game history, be sure to exit the program as intended.\n", afterPause: 500, color: ConsoleColor.Yellow);
+                    Fancy.Write("Choose Game Difficulty: ", 20);
+                    player = new Player(playerName);
+                }
+                catch (Exception ex)
+                {
+                    Fancy.Write($"\n\n\tI don't know what went wrong!!\n\t{ex.GetType()}\n\t{ex.Message}\n\n");
+                    player = new Player(playerName);
+                }
+
+                difficulty = AskForDifficulty();
             }
             else                // No text file? make one with the player's information.
             {
+                player = new Player(playerName);
                 File.WriteAllText(GameIO.GameFile, playerName + "|");
 
                 Fancy.Write("What difficulty do you want to play? (1, 2, 3, 4): ", 20);
-
+                difficulty = AskForDifficulty();
                 Tutorial();
             }
 
-            int difficulty = 2;     // Default
-            try
-            {
-                difficulty = Convert.ToInt32(Fancy.ReadLine(ConsoleColor.Red));
-                if (difficulty <= 0 || difficulty >= 5) throw new FormatException();
+            BackUpAssignment(difficulty);
 
-                Fancy.Write("Going with " + SetDifficulty(difficulty) + " difficulty");
-            }
-            catch (FormatException)
-            {
-                Fancy.Write("That is not a valid difficulty.  I'll just set you at " + SetDifficulty(difficulty) + "\n", afterPause: 500);
-            }
+            GuessANumber game = new GuessANumber(player, SetDifficulty(difficulty));
 
-            // This little bit satifies the assignment (I think)
-            Fancy.Write("\n\nFor the sake of the assignment, Writing your number to a file...  ", 50, afterPause: 750);
-            File.WriteAllText(GameIO.AssignmentFile, difficulty.ToString());
-            Fancy.Write("Done\n",$"Printing the contents of the file below:\n{File.ReadAllText(GameIO.AssignmentFile)}", 20, 25, pause: 250, afterPause: 250);
-
-            Fancy.Write("\n\nNow..."," time to put way too much work into this assignment!\n\n", pause: 500, afterPause: 500);
-
-            GuessANumberPlayer player = new GuessANumberPlayer(playerName);
-
-            GuessANumberGame game = new GuessANumberGame(player, SetDifficulty(difficulty));
-
+            // Game Loop, stops when the player doesn't want to play anymore.
             if (player.IsPlaying)
             {
                 game.Play();
@@ -63,6 +75,37 @@ namespace GuessANumber
 
             Fancy.Write("Thanks for playing!", 75, color: ConsoleColor.Green);
             Console.Read();
+        }
+
+        // This method fulfills step 2 and step 3 of the assignment on Page 218.
+        // Writes the user input to file and then prints the text back from the file.
+        public static void BackUpAssignment(int difficulty)
+        {
+            // This little bit satifies the assignment (I think)
+            Fancy.Write("\n\nFor the sake of the assignment, Writing your number to a file...  ", 50, afterPause: 750);
+            File.WriteAllText(GameIO.AssignmentFile, difficulty.ToString());
+            Fancy.Write("Done\n", $"Printing the contents of the file below:\n{File.ReadAllText(GameIO.AssignmentFile)}", 20, 25, pause: 250, afterPause: 250);
+
+            Fancy.Write("\n\nNow...", " time to put way too much work into this assignment!\n\n", pause: 500, afterPause: 500);
+        }
+
+        // Peice of code that returns the difficulty that the player chooses.
+        public static int AskForDifficulty()
+        {
+            try
+            {
+                int difficulty = Convert.ToInt32(Fancy.ReadLine(ConsoleColor.Red));
+                if (difficulty <= 0 || difficulty >= 5) throw new FormatException();
+
+                Fancy.Write("Going with " + SetDifficulty(difficulty) + " difficulty");
+                return difficulty;
+            }
+            catch (FormatException)
+            {
+                int difficulty = 2;
+                Fancy.Write("That is not a valid difficulty.  I'll just set you at " + SetDifficulty(difficulty) + "\n", afterPause: 500);
+                return difficulty;
+            }
         }
 
         // Get's the difficutly enum based on the integer that the user typed in.

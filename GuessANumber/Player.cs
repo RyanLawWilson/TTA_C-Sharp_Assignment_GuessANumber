@@ -4,10 +4,10 @@ using System.Text;
 
 namespace GuessANumber
 {
-    public class GuessANumberPlayer
+    public class Player
     {
         // New player
-        public GuessANumberPlayer(string name)
+        public Player(string name)
         {
             Name = name;
             Score = 0;
@@ -17,7 +17,7 @@ namespace GuessANumber
         }
 
         // Keep the player's information from previous games
-        public GuessANumberPlayer (string name, string id, long totalScore, int win, int loss, int plays)
+        public Player (string name, string id, long totalScore, int win, int loss, int plays)
         {
             Name = name;
             ID = id;
